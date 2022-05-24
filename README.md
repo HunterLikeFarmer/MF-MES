@@ -1,6 +1,6 @@
 # Python Code for ***Multi-fidelity Max-value Entropy Search (MF-MES)***
-This page provides a python implementation of MF-MES and its extensions.
-The code is a currently preliminary version because of which the running environment may be a bit limited, and some code is not fully organized for easy use, but the code can reproduce the result of our upcoming paper that extends the conference version of MF-MES (under review).
+This page provides a python implementation of MF-MES (Takeno et. al., ICML2020) and its extensions. 
+The code can reproduce the result of our upcoming paper that extends the conference version of MF-MES (currently under review).
 
 
 # Environment
