@@ -92,10 +92,10 @@ The code can reproduce the result of our upcoming paper that extends the confere
         * python plot_results_synthetic_wctime.py
 
 ## Reference 
-Multi-fidelity Bayesian optimization with max-value entropy search and its parallelization.
-Takeno, S., Fukuoka, H., Tsukada, Y., Koyama, T., Shiga, M., Takeuchi, I., and Karasuyama, M. 
+Multi-fidelity Bayesian optimization with max-value entropy search and its parallelization.  
+Takeno, S., Fukuoka, H., Tsukada, Y., Koyama, T., Shiga, M., Takeuchi, I., and Karasuyama, M.  
 In International Conference on Machine Learning (ICML2020), pages 9334–9345. PMLR. 
 
-A Generalized Framework of Multi-fidelity Max-value Entropy Search through Joint Entropy.
-Takeno, S., Fukuoka, H., Tsukada, Y., Koyama, T., Shiga, M., Takeuchi, I., and Karasuyama, M.
+A Generalized Framework of Multi-fidelity Max-value Entropy Search through Joint Entropy.  
+Takeno, S., Fukuoka, H., Tsukada, Y., Koyama, T., Shiga, M., Takeuchi, I., and Karasuyama, M.  
 Under review.
