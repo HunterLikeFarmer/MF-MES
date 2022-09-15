@@ -1,6 +1,6 @@
 # Python Code for ***Multi-fidelity Max-value Entropy Search (MF-MES)***
 This page provides a python implementation of MF-MES (Takeno et al., ICML2020) and its extensions. 
-The code can reproduce the result of our upcoming paper that extends the conference version of MF-MES (Takeno et al., Neural Computation, 2022).
+The code can reproduce the result of our paper that extends the conference version of MF-MES (Takeno et al., Neural Computation, 2022).
 
 
 # Environment
