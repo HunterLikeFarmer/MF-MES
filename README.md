@@ -98,4 +98,4 @@ In International Conference on Machine Learning (ICML2020), pages 9334–9345. P
 
 A Generalized Framework of Multi-fidelity Max-value Entropy Search through Joint Entropy.  
 Takeno, S., Fukuoka, H., Tsukada, Y., Koyama, T., Shiga, M., Takeuchi, I., and Karasuyama, M.  
-Neural Computation, 2022, 1-59.
+Neural Computation, 2022, 34 (10): 2145–2203.
