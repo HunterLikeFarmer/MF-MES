@@ -409,56 +409,6 @@ def main(params):
                 print('remained X shape:', [np.shape(X) for X in pool_X])
 
         preprocessing_time_list.append(optimizer.preprocessing_time)
-        # add new input
-        # if BO_type == 'Single':
-        #     start = time.time()
-        #     if X_all is None:
-        #         new_inputs = optimizer.next_input()
-        #     else:
-        #         new_inputs, pool_X = optimizer.next_input_pool(pool_X)
-        #     tmp_time = time.time() - start
-        #     optimize_acquisition_time_list.append(tmp_time)
-
-        #     new_output = test_func.values(new_inputs)
-        #     eval_num += MAX_NUM_WORKER
-        #     if 'SVM' in func_name:
-        #         if MAX_NUM_WORKER > 1:
-        #             iter_cost = []
-        #             for j in range(np.shape(new_inputs)[0]):
-        #                 iter_cost.append(test_func.costs(new_inputs[i]).ravel()[0])
-        #             iter_cost = np.max()
-        #         else:
-        #             iter_cost = test_func.costs(new_inputs)
-
-        #         '''
-        #         if 'Sync_MFMES' in BO_method:
-        #             # ,
-        #             iter_cost = np.max(remain_cost)
-        #             current_cost += np.sum(remain_cost)
-        #         else:
-        #             iter_cost = np.min(remain_cost)
-        #             current_cost += iter_cost
-        #         '''
-        #     else:
-        #         iter_cost = cost
-        #     current_cost += iter_cost
-
-        #     training_input = np.r_[training_input, np.atleast_2d(new_inputs)]
-        #     training_output = np.r_[training_output, np.atleast_2d(new_output)]
-        #     print("new_inputs : ", new_inputs)
-        #     print("its prediction:", optimizer.GPmodel.predict_noiseless(new_inputs))
-        #     print("new_output : ", new_output)
-
-        #     diff_data_num = eval_num - data_num
-        #     start = time.time()
-        #     if diff_data_num >= 5 and optimize:
-        #         optimizer.update(np.atleast_2d(new_inputs), np.atleast_2d(new_output), optimize=True)
-        #         data_num = eval_num
-        #     else:
-        #         optimizer.update(np.atleast_2d(new_inputs), np.atleast_2d(new_output), optimize=False)
-        #     tmp_time = time.time() - start
-        #     model_computation_time_list.append(tmp_time - optimizer.preprocessing_time)
-        # else:
         if BO_type == 'Single':
             start = time.time()
             if X_all is None:

@@ -88,14 +88,6 @@ class BO_core(object):
 
         x_min, f_min = utils.minimize(self.GPmodel.minus_predict, x0s,self.bounds_list, jac=self.GPmodel.minus_predict_gradients)
 
-        # f_min = np.inf
-        # x_min = x0s[0]
-        # for x0 in x0s:
-        #     res = optimize.minimize(self.GPmodel.minus_predict, x0=x0, bounds=self.bounds_list, method='L-BFGS-B', options={'ftol': 1e-3}, jac=self.GPmodel.minus_predict_gradients)
-        #     if f_min > res['fun']:
-        #         x_min = res['x']
-        #         f_min = res['fun']
-
         self.inference_point = np.atleast_2d(x_min)
         return x_min, -1 * f_min
 
@@ -656,23 +648,6 @@ class ConstrainedBO_core(object):
             if self.feasible_points is not None:
                 x0 = np.r_[x0, self.feasible_points]
 
-        # NUM_GRID = 100
-        # x1 = np.linspace(0, 1, NUM_GRID)
-        # x2 = np.linspace(0, 1, NUM_GRID)
-        # X1, X2 = np.meshgrid(x1, x2)
-        # X = np.c_[np.c_[X1.ravel()], np.c_[X2.ravel()]]
-        # for c in range(self.C+1):
-        #     for j in range(self.sampling_num):
-        #         X_features = self.random_features_list[c].transform(X)
-        #         value = (X_features.dot(np.c_[self.weights_sample_list[c][:,j]]) * self.GPmodel.stds[c] + self.GPmodel.means[c]).ravel()
-        #         plt.pcolor(X1, X2, value.reshape(NUM_GRID, NUM_GRID))
-        #         plt.colorbar()
-        #         # plt.show()
-        #         plt.savefig('sampling_tests/test_Gramacy_c='+str(c)+'_j='+str(j)+'.pdf')
-        #         plt.close()
-
-
-
         j=0
         while j < self.sampling_num:
             if pool_X is None:
@@ -796,29 +771,6 @@ class ConstrainedBO_core(object):
         return max_sample_nlopt, max_inputs_nlopt
 
 
-    # GPy
-    # def RBF_kernel_correlated(self, X1, X2):
-    #     X1 = np.atleast_2d(X1)
-    #     X2 = np.atleast_2d(X2)
-    #     dist_original_scale = (X1[:,:-1]**2)[:,None,:] + (X2[:,:-1]**2)[None,:,:] - 2*X1[:,:-1][:,None,:]*X2[:,:-1][None,:,:]
-
-    #     index = np.meshgrid(X1[:, -1], X2[:, -1])
-    #     index_1 = index[0].astype(int)
-    #     index_2 = index[1].astype(int)
-
-    #     ell_1 = self.GPmodel['.*mul.rbf.lengthscale'].values
-    #     B_1 = self.GPmodel['.*mul.coregion.W'].values.dot(self.GPmodel['.*mul.coregion.W'].values.T) + np.diag(self.GPmodel['.*mul.coregion.kappa'].values)
-    #     ell_2 = self.GPmodel['.*mul_1.rbf.lengthscale'].values
-    #     B_2 = self.GPmodel['.*mul_1.coregion.W'].values.dot(self.GPmodel['.*mul_1.coregion.W'].values.T) + np.diag(self.GPmodel['.*mul_1.coregion.kappa'].values)
-
-    #     dist = np.sum( dist_original_scale / (2 * ell_1[None,None,:]**2), axis=2)
-    #     kernel_1 = B_1[index_1, index_2].T * np.exp( - dist)
-    #     dist = np.sum( dist_original_scale / (2 * ell_2[None,None,:]**2), axis=2)
-    #     kernel_2 = B_2[index_1, index_2].T * np.exp( - dist)
-
-    #     return np.c_[kernel_1 + kernel_2]
-
-
     def _sampling_RFM_correlated(self, pool_X=None, sampling_approach='inf'):
         #
         if self.GPmodel.kernel_name == 'linear+rbf':
@@ -874,15 +826,6 @@ class ConstrainedBO_core(object):
         del X_train_features_1_m
         del X_train_features_2_m
 
-        #
-        # A_inv = np.linalg.inv((X_train_features.T).dot(X_train_features) + np.eye(np.shape(X_train_features)[1]) * self.GPmodel['.*Gaussian_noise.variance'].values)
-        # weights_mean = np.ravel(A_inv.dot(X_train_features.T).dot( self.GPmodel.Y ))
-        # weights_var = A_inv * self.GPmodel['.*Gaussian_noise.variance']
-
-        #
-        # L = np.linalg.cholesky(weights_var)
-        # standard_normal_rvs = np.random.normal(0, 1, size=(np.size(X_train_features.shape[1]), self.sampling_num))
-
         # sampling_num
         # self.weights_sample = np.c_[weights_mean] + L.dot(np.c_[standard_normal_rvs])
         self.weights_sample = np.random.normal(0, 1, size=(X_train_features.shape[1], self.sampling_num))
@@ -890,13 +833,6 @@ class ConstrainedBO_core(object):
         # N × #sampling
         self.v = self.GPmodel.posterior.woodbury_inv.dot(self.GPmodel.Y - X_train_features.dot(self.weights_sample) - np.sqrt(self.GPmodel['.*Gaussian_noise.variance'])*np.random.normal(0, 1, size=(np.shape(self.GPmodel.Y)[0], self.sampling_num)))
 
-        # print(self.GPmodel.X)
-        # K_inv = np.linalg.inv(self.GPmodel.kern.K(self.GPmodel.X, self.GPmodel.X) + self.GPmodel['.*Gaussian_noise.variance'] * np.eye(np.shape(self.GPmodel.X)[0]))
-        # self.v = K_inv.dot(self.GPmodel.Y - X_train_features.dot(self.weights_sample) - np.sqrt(self.GPmodel['.*Gaussian_noise.variance'])*np.random.normal(0, 1, size=(np.shape(self.GPmodel.Y)[0], 1)))
-
-        # del weights_var
-        # del weights_mean
-        # del A_inv
         # del L
         del X_train_features
         # del standard_normal_rvs
@@ -910,64 +846,6 @@ class ConstrainedBO_core(object):
         max_sample_nlopt = -np.inf * np.ones(self.sampling_num)
         max_inputs_nlopt = [None for i in range(self.sampling_num)]
 
-
-        # for debug plot
-        # NUM_GRID = 101
-        # x1 = np.linspace(0, 1, NUM_GRID)
-        # x2 = np.linspace(0, 1, NUM_GRID)
-        # X1, X2 = np.meshgrid(x1, x2)
-        # X = np.c_[np.c_[X1.ravel()], np.c_[X2.ravel()]]
-        # for c in range(self.C+1):
-        #     for i in range(self.sampling_num):
-        #         X_features_1 = self.rbf_features_1.transform(X)
-        #         X_features_2 = self.rbf_features_2.transform(X)
-        #         X_features = np.c_[np.kron(self.L_1[c, :], X_features_1), np.kron(self.L_2[c, :], X_features_2)]
-
-        #         prior = X_features.dot(np.c_[self.weights_sample[:,i]]).ravel()
-
-        #         update = self.v[:,i].dot(self.GPmodel.kern.K(self.GPmodel.X, np.c_[X, c*np.c_[np.ones(np.shape(X)[0])]]))
-
-        #         fig = plt.figure(figsize = (4,7))
-        #         plt.subplot(2,1,1)
-        #         plt.pcolor(X1, X2, prior.reshape(NUM_GRID, NUM_GRID), label='prior')
-        #         plt.colorbar()
-        #         plt.scatter(self.GPmodel.X[:,0][self.GPmodel.X[:,-1]==0], self.GPmodel.X[:,1][self.GPmodel.X[:,-1]==0], marker='x')
-
-        #         plt.subplot(2,1,2)
-        #         plt.pcolor(X1, X2, update.reshape(NUM_GRID, NUM_GRID), label='update')
-        #         plt.colorbar()
-        #         plt.scatter(self.GPmodel.X[:,0][self.GPmodel.X[:,-1]==0], self.GPmodel.X[:,1][self.GPmodel.X[:,-1]==0], marker='x')
-        #         # plt.show()
-        #         plt.savefig('sampling_tests/test_SynFun_c='+str(c)+'_j='+str(i)+'_datasize='+str(self.GPmodel.X.shape[0])+'.png')
-        #         plt.close()
-
-        #         x = np.atleast_2d([1./2., 1./2.])
-        #         start = time.time()
-        #         X_features_grad_1 = self.rbf_features_1.transform_grad(x)
-        #         X_features_grad_2 = self.rbf_features_2.transform_grad(x)
-        #         X_features_grad = np.c_[np.kron(self.L_1[c, :], X_features_grad_1), np.kron(self.L_2[c, :], X_features_grad_2)]
-        #         grad_test = X_features_grad.dot(np.c_[self.weights_sample[:,i]]).ravel()
-        #         grad_test += self.GPmodel.kern.gradients_X(np.c_[self.v[:,i]].T, np.c_[x, c*np.c_[np.ones(np.shape(x)[0])]], self.GPmodel.X).ravel()[:-1]
-        #         grad_test *= - self.GPmodel.stds[c]
-        #         print('grad:', time.time() - start)
-
-        #         h = 1e-6
-        #         X = np.array([[0.5, 0.5], [0.5 + h, 0.5], [0.5, 0.5 + h], [0.55, 0.5], [0.55 + h, 0.5], [0.55, 0.5 + h]])
-        #         start = time.time()
-        #         X_features_1 = self.rbf_features_1.transform(X)
-        #         X_features_2 = self.rbf_features_2.transform(X)
-        #         X_features = np.c_[np.kron(self.L_1[c, :], X_features_1), np.kron(self.L_2[c, :], X_features_2)]
-        #         value = - (X_features.dot(np.c_[self.weights_sample[:,i]]).ravel() + self.v[:,i].dot(self.GPmodel.kern.K(self.GPmodel.X, np.c_[X, c*np.c_[np.ones(np.shape(X)[0])]])) ) * self.GPmodel.stds[c] + self.GPmodel.means[c]
-        #         print('grad_app:', time.time() - start)
-
-        #         print(grad_test)
-        #         print((value[1] - value[0]) / h)
-        #         print((value[2] - value[0]) / h)
-        #         exit()
-
-        # if self.GPmodel.X.shape[0] > 100:
-        #     exit()
-        # end for debug
 
         j=0
         while j < self.sampling_num:
@@ -1500,335 +1378,6 @@ class MFBO_core(object):
         X_features = np.vstack(X_features)
         return X_features.dot(self.weights_sample) * self.GPmodel.std + self.GPmodel.mean
 
-
-
-    # def sampling_MFRFM_dsgp_for_largeM(self, pool_X=None):
-    #     feature_size = 500 #
-    #     basis_dim = feature_size // 2 # //(2*self.M)
-    #     self.rbf_features_1 = utils.RFM_RBF(lengthscales=self.GPmodel['.*mul.rbf.lengthscale'].values, input_dim=self.input_dim, basis_dim=basis_dim)
-    #     self.rbf_features_2 = utils.RFM_RBF(lengthscales=self.GPmodel['.*mul_1.rbf.lengthscale'].values, input_dim=self.input_dim, basis_dim=basis_dim)
-
-    #     W = self.GPmodel['.*mul.coregion.W'].values[::-1]
-    #     kappa = self.GPmodel['.*mul.coregion.kappa'].values[::-1]
-    #     # print(W, kappa)
-    #     if not all(kappa == np.zeros(self.M)):
-    #         # print(np.linalg.cholesky(W.dot(W.T) + np.diag(kappa)))
-    #         self.L_1 = np.linalg.cholesky(W.dot(W.T) + np.diag(kappa))
-    #     else:
-    #         self.L_1 = W
-    #     W = self.GPmodel['.*mul_1.coregion.W'].values[::-1]
-    #     kappa = self.GPmodel['.*mul_1.coregion.kappa'].values[::-1]
-    #     # print(W, kappa)
-    #     if not all(kappa == np.zeros(self.M)):
-    #         # print(W.dot(W.T) + np.diag(kappa))
-    #         # print(np.linalg.cholesky(W.dot(W.T) + np.diag(kappa)))
-    #         self.L_2 = np.linalg.cholesky(W.dot(W.T) + np.diag(kappa))
-    #     else:
-    #         self.L_2 = W
-
-    #     #
-    #     # print(self.L_1, self.L_2)
-    #     self.L_1 = self.L_1[::-1]
-    #     self.L_2 = self.L_2[::-1]
-    #     # print(self.L_1, self.L_2)
-
-    #     X_train_features_1 = np.sqrt(self.GPmodel['.*mul.rbf.variance'])*self.rbf_features_1.transform(self.GPmodel.X[:, : -1])
-    #     approx_K_1 = X_train_features_1.dot(X_train_features_1.T)
-    #     X_train_features_1 = np.c_[self.L_1[:,0][self.GPmodel.X[:,-1].astype(np.int)]] * X_train_features_1
-
-    #     X_train_features_2 = np.sqrt(self.GPmodel['.*mul_1.rbf.variance'])*self.rbf_features_2.transform(self.GPmodel.X[:, : -1])
-    #     approx_K_2 = X_train_features_2.dot(X_train_features_2.T)
-    #     X_train_features_2 = np.c_[self.L_2[:,0][self.GPmodel.X[:,-1].astype(np.int)]] * X_train_features_2
-
-    #     X_train_features = np.c_[X_train_features_1, X_train_features_2]
-    #     # print(np.shape(X_train_features))
-
-    #     B_1 = self.L_1.dot(self.L_1.T)
-    #     B_2 = self.L_2.dot(self.L_2.T)
-
-    #     fide_num_1, fide_num_2 = np.meshgrid(self.GPmodel.X[:,-1], self.GPmodel.X[:,-1])
-    #     fide_num_1 = fide_num_1.astype(np.int)
-    #     fide_num_2 = fide_num_2.astype(np.int)
-    #     approx_K = B_1[fide_num_1.ravel(), fide_num_2.ravel()].reshape(np.shape(approx_K_1)) * approx_K_1
-    #     approx_K += B_2[fide_num_1.ravel(), fide_num_2.ravel()].reshape(np.shape(approx_K_1)) * approx_K_2
-
-
-    #     low_fidelity_num = np.size(np.where(self.GPmodel.X[:,-1] < self.M-1)[0])
-    #     X_train_cov = approx_K + self.GPmodel['.*Gaussian_noise.variance'] * np.eye(np.shape(self.GPmodel.X)[0])
-
-
-    #     self.sampled_weights_for_highest = np.random.normal(0, 1, size=(feature_size, self.sampling_num))
-    #     low_train_cov = X_train_cov[:low_fidelity_num, :low_fidelity_num] - X_train_features[:low_fidelity_num,:].dot(X_train_features[:low_fidelity_num,:].T)
-    #     low_train_mean = X_train_features[:low_fidelity_num,:].dot(self.sampled_weights_for_highest)
-
-    #     # # non-singular check
-    #     # np.set_printoptions(precision=3)
-    #     # print(low_train_cov)
-    #     # print(X_train_cov[:low_fidelity_num, :low_fidelity_num])
-    #     # print(X_train_features[:low_fidelity_num,:].dot(X_train_features[:low_fidelity_num,:].T))
-    #     # print(np.sort(np.linalg.eigvals(low_train_cov)))
-    #     # exit()
-
-    #     low_train_cov_chol = np.linalg.cholesky(low_train_cov)
-    #     sampled_low_train_observations = low_train_mean + low_train_cov_chol.dot(np.random.normal(0, 1, size=(low_fidelity_num, self.sampling_num)))
-    #     sampled_high_train_observations = X_train_features[low_fidelity_num:,:].dot(self.sampled_weights_for_highest) + np.sqrt(self.GPmodel['.*Gaussian_noise.variance']) * np.random.normal(0, 1, size=(np.shape(self.GPmodel.X)[0] - low_fidelity_num, self.sampling_num))
-
-    #     sampled_train_observations = np.r_[sampled_low_train_observations, sampled_high_train_observations]
-    #     self.observations = self.GPmodel.Y_normalized.copy()
-
-    #     max_samples = np.zeros(self.sampling_num)
-    #     max_inputs = list([])
-    #     self.X_train_cov_inv = np.linalg.inv(self.GPmodel.kern.K(self.GPmodel.X) + self.GPmodel['.*Gaussian_noise.variance'] * np.eye(np.shape(self.GPmodel.X)[0]))
-    #     # plot_x = np.linspace(0,1,100)
-    #     for j in range(self.sampling_num):
-    #         def sampled_function(x):
-    #             x = np.atleast_2d(x)
-    #             X_features_1 = np.sqrt(self.GPmodel['.*mul.rbf.variance'])*self.rbf_features_1.transform(x)
-    #             X_features_2 = np.sqrt(self.GPmodel['.*mul_1.rbf.variance'])*self.rbf_features_2.transform(x)
-    #             X_features = np.c_[self.L_1[self.M-1,0] * X_features_1, self.L_2[self.M-1,0] * X_features_2]
-    #             prior = X_features.dot(self.sampled_weights_for_highest[:,j])
-    #             update = self.GPmodel.kern.K(np.c_[x, np.matlib.repmat([self.M-1],np.shape(x)[0], 1)], self.GPmodel.X).dot(self.X_train_cov_inv).dot(self.observations - np.c_[sampled_train_observations[:,j]]).ravel()
-    #             return -1 * ((prior + update)* self.GPmodel.std + self.GPmodel.mean)
-
-    #         # print(sampled_function([0.5,0.5]))
-    #         if pool_X is None:
-    #             # DIRECT
-    #             result = utils.minimize(sampled_function, self.bounds_list, self.input_dim)
-    #             max_samples[j] = -1 * result['fun']
-    #             max_inputs.append(result['x'])
-    #         else:
-    #             pool_Y = sampled_function(pool_X)
-    #             max_index = np.argmin(pool_Y)
-    #             max_samples[j] = -1 * pool_Y[max_index]
-    #             max_inputs.append(pool_X[max_index])
-    #     # # for debug
-    #     #     plt.plot(plot_x, - sampled_function(np.c_[plot_x]))
-    #     # mean, var = self.GPmodel.predict_noiseless(np.c_[np.c_[plot_x], np.matlib.repmat([self.M-1],np.size(plot_x), 1)])
-    #     # mean = mean.ravel()
-    #     # var = var.ravel()
-    #     # plt.plot(plot_x,mean, label='mean')
-    #     # plt.fill_between(plot_x, mean - 2*np.sqrt(var), mean + 2*np.sqrt(var), alpha=0.3)
-    #     # plt.legend(loc='best')
-    #     # plt.savefig('test.png')
-
-    #     #
-    #     max_samples[max_samples < self.y_max + 5 * np.sqrt(self.GPmodel['.*Gaussian_noise.variance'].values) * self.GPmodel.std] = self.y_max + 5*np.sqrt(self.GPmodel['.*Gaussian_noise.variance'].values) * self.GPmodel.std
-    #     return max_samples, np.array(max_inputs)
-
-
-    # def sampling_MFRFM_dsgp(self, pool_X=None):
-    #     feature_size = 1000
-    #     KERNEL_NUM = 2
-    #     basis_dim = feature_size //(KERNEL_NUM*self.M)
-    #     self.rbf_features_1 = utils.RFM_RBF(lengthscales=self.GPmodel['.*mul.rbf.lengthscale'].values, input_dim=self.input_dim, basis_dim=basis_dim)
-    #     self.rbf_features_2 = utils.RFM_RBF(lengthscales=self.GPmodel['.*mul_1.rbf.lengthscale'].values, input_dim=self.input_dim, basis_dim=basis_dim)
-
-    #     W = self.GPmodel['.*mul.coregion.W'].values[::-1]
-    #     kappa = self.GPmodel['.*mul.coregion.kappa'].values[::-1]
-    #     # print(W, kappa)
-    #     if not all(kappa == np.zeros(self.M)):
-    #         # print(np.linalg.cholesky(W.dot(W.T) + np.diag(kappa)))
-    #         self.L_1 = np.linalg.cholesky(W.dot(W.T) + np.diag(kappa))
-    #     else:
-    #         self.L_1 = W
-    #     W = self.GPmodel['.*mul_1.coregion.W'].values[::-1]
-    #     kappa = self.GPmodel['.*mul_1.coregion.kappa'].values[::-1]
-    #     # print(W, kappa)
-    #     if not all(kappa == np.zeros(self.M)):
-    #         # print(W.dot(W.T) + np.diag(kappa))
-    #         # print(np.linalg.cholesky(W.dot(W.T) + np.diag(kappa)))
-    #         self.L_2 = np.linalg.cholesky(W.dot(W.T) + np.diag(kappa))
-    #     else:
-    #         self.L_2 = W
-    #     #
-    #     self.L_1 = self.L_1[::-1]
-    #     self.L_2 = self.L_2[::-1]
-
-
-    #     X_train_features_1 = list([])
-    #     X_train_features_2 = list([])
-    #     #
-    #     for m in range(self.M):
-    #         X_train_features_1_m = np.sqrt(self.GPmodel['.*mul.rbf.variance'])*self.rbf_features_1.transform(self.GPmodel.X[self.GPmodel.X[:,-1]==m, : -1])
-    #         X_train_features_1.append(np.kron(self.L_1[m, :], X_train_features_1_m))
-    #         X_train_features_2_m = np.sqrt(self.GPmodel['.*mul_1.rbf.variance'])*self.rbf_features_2.transform(self.GPmodel.X[self.GPmodel.X[:,-1]==m, : -1])
-    #         X_train_features_2.append(np.kron(self.L_2[m, :], X_train_features_2_m))
-    #     X_train_features_1 = np.vstack(X_train_features_1)
-    #     X_train_features_2 = np.vstack(X_train_features_2)
-    #     X_train_features = np.c_[X_train_features_1, X_train_features_2]
-
-    #     max_samples = np.zeros(self.sampling_num)
-    #     max_inputs = list([])
-    #     self.X_train_cov_inv = np.linalg.inv(self.GPmodel.posterior._K + self.GPmodel['.*Gaussian_noise.variance'] * np.eye(np.shape(self.GPmodel.X)[0]))
-    #     self.X_train_cov_inv_chol = np.linalg.cholesky(self.X_train_cov_inv)
-
-    #     self.sampled_weights = np.random.normal(0, 1, size=(self.M*KERNEL_NUM*basis_dim, self.sampling_num))
-    #     diff_observation_blr = self.GPmodel.Y_normalized - X_train_features.dot(self.sampled_weights) + np.sqrt(self.GPmodel['.*Gaussian_noise.variance'])*np.c_[np.random.normal(0, 1, size=(np.shape(self.GPmodel.Y)[0], self.sampling_num))]
-    #     self.update_latter_vectors = self.X_train_cov_inv_chol.T.dot(diff_observation_blr)
-    #     # plot_x = np.linspace(0,1,100)
-    #     for j in range(self.sampling_num):
-    #         def sampled_function(x):
-    #             x = np.atleast_2d(x)
-    #             X_features_1 = np.sqrt(self.GPmodel['.*mul.rbf.variance'])*self.rbf_features_1.transform(x)
-    #             X_features_2 = np.sqrt(self.GPmodel['.*mul_1.rbf.variance'])*self.rbf_features_2.transform(x)
-    #             X_features = np.c_[self.L_1[self.M-1,0] * X_features_1, self.L_2[self.M-1,0] * X_features_2]
-    #             prior = X_features.dot(self.sampled_weights[:KERNEL_NUM*basis_dim,j])
-
-    #             x = np.c_[x, np.matlib.repmat([self.M-1],np.shape(x)[0], 1)]
-    #             KxX = self.GPmodel.kern.K(x, self.GPmodel.X)
-    #             temp = np.dot(KxX, self.X_train_cov_inv_chol)
-    #             update = temp.dot(self.update_latter_vectors[:,j])
-    #             # update = self.GPmodel.kern.K(x, self.GPmodel.X).dot(self.X_train_cov_inv).dot(diff_observation_blr[:,j]).ravel()
-    #             return -1 * ((prior + update)* self.GPmodel.std + self.GPmodel.mean)
-
-    #         # start = time.time()
-    #         # print(sampled_function([0.5,0.5,0.5]))
-    #         # print("time:", time.time()-start)
-    #         # exit()
-    #         if pool_X is None:
-    #             # DIRECT
-    #             result = utils.minimize(sampled_function, self.bounds_list, self.input_dim)
-    #             max_samples[j] = -1 * result['fun']
-    #             max_inputs.append(result['x'])
-    #         else:
-    #             pool_Y = sampled_function(pool_X)
-    #             max_index = np.argmin(pool_Y)
-    #             max_samples[j] = -1 * pool_Y[max_index]
-    #             max_inputs.append(pool_X[max_index])
-    #     # # for debug
-    #     #     plt.plot(plot_x, - sampled_function(np.c_[plot_x]))
-    #     # mean, var = self.GPmodel.predict_noiseless(np.c_[np.c_[plot_x], np.matlib.repmat([self.M-1],np.size(plot_x), 1)])
-    #     # mean = mean.ravel()
-    #     # var = var.ravel()
-    #     # plt.plot(plot_x,mean, label='mean')
-    #     # plt.fill_between(plot_x, mean - 2*np.sqrt(var), mean + 2*np.sqrt(var), alpha=0.3)
-    #     # plt.legend(loc='best')
-    #     # plt.savefig('test.png')
-
-    #     #
-    #     max_samples[max_samples < self.y_max + 5 * np.sqrt(self.GPmodel['.*Gaussian_noise.variance'].values) * self.GPmodel.std] = self.y_max + 5*np.sqrt(self.GPmodel['.*Gaussian_noise.variance'].values) * self.GPmodel.std
-    #     return max_samples, np.array(max_inputs)
-
-
-    # def sample_path_MFRFM_dsgp(self, X):
-    #     '''
-    #
-
-    #     Parameter
-    #     -----------------------
-    #     X: numpy array
-    #         inputs (N \times input_dim + 1)
-
-    #     Retrun
-    #     -----------------------
-    #     sampled_outputs: numpy array
-    #         sample_path f_s(X) (N \times sampling_num)
-    #     '''
-    #     X = np.atleast_2d(X)
-    #     X_features = list()
-    #     for i in range(np.shape(X)[0]):
-    #         X_features_1 = np.sqrt(self.GPmodel['.*mul.rbf.variance'])*self.rbf_features_1.transform(X[i,:-1])
-    #         X_features_2 = np.sqrt(self.GPmodel['.*mul_1.rbf.variance'])*self.rbf_features_2.transform(X[i,:-1])
-    #         X_features.append(np.c_[np.kron(self.L_1[np.int(X[i,-1]), :], X_features_1), np.kron(self.L_2[np.int(X[i,-1]), :], X_features_2)])
-    #     X_features = np.vstack(X_features)
-    #     return X_features.dot(self.weights_sample) * self.GPmodel.std + self.GPmodel.mean
-
-
-
-
-    # def sampling_MTRFM(self, pool_X=None, slack = False):
-    #     basis_dim = [200, 5]
-    #     feature_size = np.product(basis_dim)
-    #     self.rbf_features_1 = utils.RFM_RBF(lengthscales=self.GPmodel['.*mul.rbf.lengthscale'].values, input_dim=self.input_dim, basis_dim=basis_dim[0])
-    #     self.rbf_features_2 = utils.RFM_RBF(lengthscales=self.GPmodel['.*mul.rbf_1.lengthscale'].values, input_dim=self.fidelity_feature_dim, basis_dim=basis_dim[1])
-
-    #     X_train_features = np.empty(shape=(1,feature_size))
-    #     X_train_features = list([])
-    #     for m in range(self.M):
-    #         X_train_features_1_m = np.sqrt(self.GPmodel['.*mul.rbf.variance'])*self.rbf_features_1.transform(self.GPmodel.X[np.all(self.GPmodel.X[:,self.input_dim:]==self.fidelity_features[m], axis=1), :self.input_dim])
-    #         X_train_features_2_m = np.sqrt(self.GPmodel['.*mul.rbf_1.variance'])*self.rbf_features_2.transform(np.atleast_2d(self.fidelity_features[m]))
-    #         X_train_features.append(np.kron(X_train_features_1_m, X_train_features_2_m))
-    #     X_train_features = np.vstack(X_train_features)
-
-    #     max_samples = np.zeros(self.sampling_num)
-    #     max_inputs = list([])
-    #     #
-    #     A_inv = np.linalg.inv((X_train_features.T).dot(
-    #         X_train_features) + np.eye(np.shape(X_train_features)[1]) * self.GPmodel['.*Gaussian_noise.variance'])
-    #     weights_mean = np.ravel(A_inv.dot(X_train_features.T).dot(self.GPmodel.Y_normalized))
-    #     weights_var = A_inv * self.GPmodel['.*Gaussian_noise.variance'].values
-
-    #     c = np.zeros(self.M)
-    #     #
-    #     L = np.linalg.cholesky(weights_var)
-    #     standard_normal_rvs = np.random.normal(0, 1, size=(np.size(weights_mean), self.sampling_num))
-    #     self.weights_sample = np.c_[weights_mean] + L.dot(np.c_[standard_normal_rvs])
-    #     for j in range(self.sampling_num):
-    #         def bayesian_linear_regression(x):
-    #             X_features_1 = np.sqrt(self.GPmodel['.*mul.rbf.variance'])*self.rbf_features_1.transform(x)
-    #             X_features_2 = np.sqrt(self.GPmodel['.*mul.rbf_1.variance'])*self.rbf_features_2.transform(self.fidelity_features[-1])
-    #             X_features = np.kron(X_features_1, X_features_2)
-    #             return -1 * (X_features.dot(self.weights_sample[:,j]) * self.GPmodel.std + self.GPmodel.mean)
-
-    #         if pool_X is None:
-    #             # DIRECT
-    #             result = utils.minimize(bayesian_linear_regression, self.bounds_list, self.input_dim)
-    #             max_samples[j] = -1 * result['fun']
-    #             max_inputs.append(result['x'])
-    #         else:
-    #             pool_Y = bayesian_linear_regression(pool_X)
-    #             max_index = np.argmin(pool_Y)
-    #             max_samples[j] = -1 * pool_Y[max_index]
-    #             max_inputs.append(pool_X[max_index])
-
-    #         if slack:
-    #             for m in range(self.M-1):
-    #                 def bayesian_linear_regression_low(x):
-    #                     X_features_1 = np.sqrt(self.GPmodel['.*mul.rbf.variance'])*self.rbf_features_1.transform(x)
-    #                     X_features_2 = np.sqrt(self.GPmodel['.*mul.rbf_1.variance'])*self.rbf_features_2.transform(self.fidelity_features[m])
-    #                     X_features = np.kron(X_features_1, X_features_2)
-    #                     return -1 * (X_features.dot(self.weights_sample[:,j]) * self.GPmodel.std + self.GPmodel.mean)
-
-    #                 if pool_X is None:
-    #                     # DIRECT
-    #                     result = utils.minimize(bayesian_linear_regression_low, self.bounds_list, self.input_dim)
-    #                     c[m] += (-1 * result['fun']) - (-1 * bayesian_linear_regression_low(max_inputs[len(max_inputs)-1]))
-    #                 else:
-    #                     pool_Y = bayesian_linear_regression_low(pool_X)
-    #                     c[m] += (-1 * np.min(pool_Y)) - (-1 * bayesian_linear_regression_low(max_inputs[len(max_inputs)-1]))
-
-    #     #
-    #     max_samples[max_samples < self.y_max + 5 *
-    #                 np.sqrt(self.GPmodel['.*Gaussian_noise.variance'].values) * self.GPmodel.std] = self.y_max + 5*np.sqrt(self.GPmodel['.*Gaussian_noise.variance'].values) * self.GPmodel.std
-    #     if slack:
-    #         return max_samples, np.array(max_inputs), c.ravel() / self.sampling_num
-    #     else:
-    #         return max_samples, np.array(max_inputs)
-
-    # def sample_path_MTRFM(self, X):
-    #     '''
-    #
-
-    #     Parameter
-    #     -----------------------
-    #     X: numpy array
-    #         inputs (N \times input_dim + fidelity_feature_dim)
-
-    #     Retrun
-    #     -----------------------
-    #     sampled_outputs: numpy array
-    #         sample_path f_s(X) (N \times sampling_num)
-    #     '''
-    #     X = np.atleast_2d(X)
-    #     X_features = list()
-    #     for i in range(np.shape(X)[0]):
-    #         X_features_1 = np.sqrt(self.GPmodel['.*mul.rbf.variance'])*self.rbf_features_1.transform(X[i,:-1])
-    #         X_features_2 = np.sqrt(self.GPmodel['.*mul.rbf_1.variance'])*self.rbf_features_2.transform(self.fidelity_features[np.int(X[i,-1])])
-    #         X_features.append(np.kron(X_features_1, X_features_2))
-    #     X_features = np.vstack(X_features)
-    #     return -1 * (X_features.dot(self.weights_sample) * self.GPmodel.std + self.GPmodel.mean)
-
-    #cdf(Y) = val
     #thres
     def _find_r(self, val, cdf_func, R, Y, thres):
         current_r_pos = np.argmin(np.abs(val - R))
@@ -1909,24 +1458,3 @@ class MFBO_core(object):
             max_samples = (left + 3*np.sqrt(self.GPmodel['.*Gaussian_noise.variance'].values) * self.GPmodel.std
                            ) * np.ones(self.sampling_num)
         return max_samples
-
-
-    # # Random
-    # def sampling_test(self, pool_X=None):
-    #     if pool_X is None:
-    #         RANDOM_INPUT_NUM = 10000
-    #         x = self.bounds[0, :] + (self.bounds[1, :] - self.bounds[0, :])*np.random.rand(RANDOM_INPUT_NUM, self.input_dim)
-    #         x = np.r_[np.c_[x, np.c_[(self.fidelity_features[-1])*np.ones((RANDOM_INPUT_NUM, self.fidelity_feature_dim))]], self.GPmodel.X]
-    #     else:
-    #         pool_X = np.atleast_2d(pool_X)
-    #         pool_X = np.c_[pool_X, np.matlib.repmat(self.fidelity_features[-1], np.shape(pool_X)[0], 1)]
-    #         x = pool_X
-    #     mean, cov = self.GPmodel.predict(x, full_cov=True)
-    #     cov_chol = np.linalg.cholesky(cov)
-    #     random_normal = np.random.normal(size=(RANDOM_INPUT_NUM+np.shape(self.GPmodel.X)[0], self.sampling_num))
-
-    #     max_samples = mean + cov_chol.dot(random_normal)
-    #     max_samples = np.max(max_samples, axis=0)
-    #     max_samples[max_samples < self.y_max + 5 *
-    #                 np.sqrt(self.GPmodel['.*Gaussian_noise.variance'].values) * self.GPmodel.std] = self.y_max + 5*np.sqrt(self.GPmodel['.*Gaussian_noise.variance'].values) * self.GPmodel.std
-    #     return max_samples

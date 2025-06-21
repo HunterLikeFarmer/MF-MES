@@ -1,3 +1,3 @@
-from myBO.scripts.myutils.BO_core import *
-from myBO.scripts.myutils.myutils import *
-from myBO.scripts.myutils.truncated_normal_params import *
+from scripts.myutils.BO_core import *
+from scripts.myutils.myutils import *
+from scripts.myutils.truncated_normal_params import *
