@@ -1,0 +1,158 @@
+[
+  {
+    "iteration": 1,
+    "current": {
+      "A100": 75,
+      "V100": 53
+    },
+    "best_so_far": {
+      "A100": 76,
+      "V100": 52,
+      "wall_clock_time": 480.3587809
+    },
+    "cumulative_cost": 4.0
+  },
+  {
+    "iteration": 2,
+    "current": {
+      "A100": 128,
+      "V100": 0
+    },
+    "best_so_far": {
+      "A100": 128,
+      "V100": 0,
+      "wall_clock_time": 386.8276472
+    },
+    "cumulative_cost": 8.0
+  },
+  {
+    "iteration": 3,
+    "current": {
+      "A100": 0,
+      "V100": 128
+    },
+    "best_so_far": {
+      "A100": 128,
+      "V100": 0,
+      "wall_clock_time": 386.8276472
+    },
+    "cumulative_cost": 12.0
+  },
+  {
+    "iteration": 4,
+    "current": {
+      "A100": 115,
+      "V100": 13
+    },
+    "best_so_far": {
+      "A100": 128,
+      "V100": 0,
+      "wall_clock_time": 386.8276472
+    },
+    "cumulative_cost": 16.0
+  },
+  {
+    "iteration": 5,
+    "current": {
+      "A100": 31,
+      "V100": 97
+    },
+    "best_so_far": {
+      "A100": 128,
+      "V100": 0,
+      "wall_clock_time": 386.8276472
+    },
+    "cumulative_cost": 20.0
+  },
+  {
+    "iteration": 6,
+    "current": {
+      "A100": 41,
+      "V100": 87
+    },
+    "best_so_far": {
+      "A100": 128,
+      "V100": 0,
+      "wall_clock_time": 386.8276472
+    },
+    "cumulative_cost": 24.0
+  },
+  {
+    "iteration": 7,
+    "current": {
+      "A100": 20,
+      "V100": 108
+    },
+    "best_so_far": {
+      "A100": 128,
+      "V100": 0,
+      "wall_clock_time": 386.8276472
+    },
+    "cumulative_cost": 28.0
+  },
+  {
+    "iteration": 8,
+    "current": {
+      "A100": 125,
+      "V100": 3
+    },
+    "best_so_far": {
+      "A100": 128,
+      "V100": 0,
+      "wall_clock_time": 386.8276472
+    },
+    "cumulative_cost": 32.0
+  },
+  {
+    "iteration": 9,
+    "current": {
+      "A100": 104,
+      "V100": 24
+    },
+    "best_so_far": {
+      "A100": 128,
+      "V100": 0,
+      "wall_clock_time": 386.8276472
+    },
+    "cumulative_cost": 36.0
+  },
+  {
+    "iteration": 10,
+    "current": {
+      "A100": 0,
+      "V100": 64
+    },
+    "best_so_far": {
+      "A100": 128,
+      "V100": 0,
+      "wall_clock_time": 386.8276472
+    },
+    "cumulative_cost": 40.0
+  },
+  {
+    "iteration": 11,
+    "current": {
+      "A100": 65,
+      "V100": 63
+    },
+    "best_so_far": {
+      "A100": 128,
+      "V100": 0,
+      "wall_clock_time": 386.8276472
+    },
+    "cumulative_cost": 44.0
+  },
+  {
+    "iteration": 12,
+    "current": {
+      "A100": 86,
+      "V100": 42
+    },
+    "best_so_far": {
+      "A100": 128,
+      "V100": 0,
+      "wall_clock_time": 386.8276472
+    },
+    "cumulative_cost": 48.0
+  }
+]
